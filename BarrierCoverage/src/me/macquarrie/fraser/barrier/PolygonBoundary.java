@@ -6,6 +6,7 @@
 package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 /**
  * 
@@ -32,7 +33,7 @@ public class PolygonBoundary extends Boundary {
 
 	// Determine whether adding the point to the polygon will leave the polygon
 	// simple or not
-	public static boolean isSimpleWith(Polygon poly, PointF p) {
+	public static boolean isSimpleWith(Polygon poly, Point2D p) {
 
 		// Clearly any polygon with less than 4 points is simple, so adding the
 		// point will leave the polygon simple
@@ -40,8 +41,8 @@ public class PolygonBoundary extends Boundary {
 			return true;
 		}
 
-		PointF point0 = new PointF(poly.xpoints[0], poly.ypoints[0]);
-		PointF pointN = new PointF(poly.xpoints[poly.npoints - 1], poly.ypoints[poly.npoints - 1]);
+		Point2D point0 = new Point2D.Double(poly.xpoints[0], poly.ypoints[0]);
+		Point2D pointN = new Point2D.Double(poly.xpoints[poly.npoints - 1], poly.ypoints[poly.npoints - 1]);
 
 		double s = slope(point0, pointN);
 
@@ -59,8 +60,8 @@ public class PolygonBoundary extends Boundary {
 		// with the lines that will be formed by addin the point
 		for (int i = 1; i < poly.npoints; i++) {
 
-			PointF p1 = new PointF(poly.xpoints[i - 1], poly.ypoints[i - 1]);
-			PointF p2 = new PointF(poly.xpoints[i], poly.ypoints[i]);
+			Point2D p1 = new Point2D.Double(poly.xpoints[i - 1], poly.ypoints[i - 1]);
+			Point2D p2 = new Point2D.Double(poly.xpoints[i], poly.ypoints[i]);
 
 			if (intersects(p, point0, p1, p2) || intersects(p, pointN, p1, p2)) {
 				return false;
@@ -72,21 +73,21 @@ public class PolygonBoundary extends Boundary {
 		return true;
 	}
 
-	public static double slope(PointF a, PointF b) {
-		if (a.x == b.x) {
+	public static double slope(Point2D a, Point2D b) {
+		if (a.getX() == b.getX()) {
 			return 0.000001;
 		}
-		return (a.y - b.y) / (a.x - b.x);
+		return (a.getY() - b.getY()) / (a.getX() - b.getX());
 	}
 
 	// Determine if two line segments intersect
-	public static boolean intersects(PointF a1, PointF a2, PointF b1, PointF b2) {
-		double A1 = a2.y - a1.y;
-		double B1 = a1.x - a2.x;
-		double C1 = A1 * a1.x + B1 * a1.y;
-		double A2 = b2.y - b1.y;
-		double B2 = b1.x - b2.x;
-		double C2 = A2 * b1.x + B2 * b1.y;
+	public static boolean intersects(Point2D a1, Point2D a2, Point2D b1, Point2D b2) {
+		double A1 = a2.getY() - a1.getY();
+		double B1 = a1.getX() - a2.getX();
+		double C1 = A1 * a1.getX() + B1 * a1.getY();
+		double A2 = b2.getY() - b1.getY();
+		double B2 = b1.getX() - b2.getX();
+		double C2 = A2 * b1.getX() + B2 * b1.getY();
 		double det = A1 * B2 - A2 * B1;
 		double x;
 		double y;
@@ -99,14 +100,14 @@ public class PolygonBoundary extends Boundary {
 		}
 
 		// make sure the intersection is on the line segments when returning it
-		return (Math.min(a1.x, a2.x) <= x && Math.max(a1.x, a2.x) >= x);
+		return (Math.min(a1.getX(), a2.getX()) <= x && Math.max(a1.getX(), a2.getX()) >= x);
 
 	}
 
 	// Set the nodes by beginning at a spot on the polygon and working around
 	// the perimeter of the polygon.
 
-	public PointF[] setNodes(PointF[] nodes, int numNodes) {
+	public Point2D[] setNodes(Point2D[] nodes, int numNodes) {
 
 		int i = closestLine(nodes[0]);
 		int j = i + 1;
@@ -115,7 +116,7 @@ public class PolygonBoundary extends Boundary {
 		for (int k = 1; k < numNodes; k++) {
 
 			double distToNode = nodeDistance;
-			PointF previous = new PointF(nodes[k - 1]);
+			Point2D previous = new Point2D.Double(nodes[k - 1].getX(), nodes[k - 1].getY());
 
 			while (true) {
 
@@ -125,21 +126,20 @@ public class PolygonBoundary extends Boundary {
 					j = 0;
 
 				double dist = Math.sqrt(
-						Math.pow(previous.x - polygon.xpoints[j], 2) + Math.pow(previous.y - polygon.ypoints[j], 2));
+						Math.pow(previous.getX() - polygon.xpoints[j], 2) + Math.pow(previous.getY() - polygon.ypoints[j], 2));
 
 				// If the next node is on this line segment
 				if (dist > distToNode) {
-					PointF p = new PointF(previous);
-					p.x -= distToNode * (previous.x - polygon.xpoints[j]) / dist;
-					p.y -= distToNode * (previous.y - polygon.ypoints[j]) / dist;
+					Point2D p = new Point2D.Double(previous.getX(), previous.getY());
+					p.setLocation(p.getX() - distToNode * (previous.getX() - polygon.xpoints[j]) / dist,
+								  p.getY() - distToNode * (previous.getY() - polygon.ypoints[j]) / dist);
 					nodes[k] = p;
 					break;
 				}
 
 				// if the next node is not on this line segment
 				else {
-					previous.x = polygon.xpoints[j];
-					previous.y = polygon.ypoints[j];
+					previous.setLocation(polygon.xpoints[j], polygon.ypoints[j]);
 					distToNode -= dist;
 					i++;
 					j++;
@@ -150,10 +150,10 @@ public class PolygonBoundary extends Boundary {
 	}
 
 	// Return the closest point on the barrier to the point provided
-	public PointF closestPoint(PointF p) {
+	public Point2D closestPoint(Point2D p) {
 
 		double distance = 9999999;
-		PointF intersection = new PointF(0, 0);
+		Point2D intersection = new Point2D.Double(0.0, 0.0);
 
 		for (int i = 0; i < polygon.npoints; i++) {
 
@@ -161,21 +161,21 @@ public class PolygonBoundary extends Boundary {
 
 			if (j == polygon.npoints)
 				j = 0;
-			PointF in = new PointF(0, 0);
+			Point2D in = new Point2D.Double(0, 0);
 			double dist;
 
-			double u = ((p.x - polygon.xpoints[i]) * (polygon.xpoints[j] - polygon.xpoints[i])
-					+ (p.y - polygon.ypoints[i]) * (polygon.ypoints[j] - polygon.ypoints[i]))
+			double u = ((p.getX() - polygon.xpoints[i]) * (polygon.xpoints[j] - polygon.xpoints[i])
+					+ (p.getY() - polygon.ypoints[i]) * (polygon.ypoints[j] - polygon.ypoints[i]))
 					/ (Math.pow((polygon.xpoints[j] - polygon.xpoints[i]), 2)
 							+ Math.pow((polygon.ypoints[j] - polygon.ypoints[i]), 2));
 
-			in.x = polygon.xpoints[i] + u * (polygon.xpoints[j] - polygon.xpoints[i]);
-			in.y = polygon.ypoints[i] + u * (polygon.ypoints[j] - polygon.ypoints[i]);
+			in.setLocation(	polygon.xpoints[i] + u * (polygon.xpoints[j] - polygon.xpoints[i]),
+							polygon.ypoints[i] + u * (polygon.ypoints[j] - polygon.ypoints[i]));
 
-			if (Math.min(polygon.xpoints[i], polygon.xpoints[j]) <= in.x
-					&& Math.max(polygon.xpoints[i], polygon.xpoints[j]) >= in.x) {
+			if (Math.min(polygon.xpoints[i], polygon.xpoints[j]) <= in.getX()
+					&& Math.max(polygon.xpoints[i], polygon.xpoints[j]) >= in.getX()) {
 
-				dist = Math.sqrt(Math.pow(in.x - p.x, 2) + Math.pow(in.y - p.y, 2));
+				dist = Math.sqrt(Math.pow(in.getX() - p.getX(), 2) + Math.pow(in.getY() - p.getY(), 2));
 
 				if (dist < distance) {
 					distance = dist;
@@ -185,14 +185,14 @@ public class PolygonBoundary extends Boundary {
 
 			else {
 				if (Math.sqrt(
-						Math.pow(polygon.xpoints[i] - p.x, 2) + Math.pow(polygon.ypoints[i] - p.y, 2)) < distance) {
-					distance = Math.sqrt(Math.pow(polygon.xpoints[i] - p.x, 2) + Math.pow(polygon.ypoints[i] - p.y, 2));
-					intersection = new PointF(polygon.xpoints[i], polygon.ypoints[i]);
+						Math.pow(polygon.xpoints[i] - p.getX(), 2) + Math.pow(polygon.ypoints[i] - p.getY(), 2)) < distance) {
+					distance = Math.sqrt(Math.pow(polygon.xpoints[i] - p.getX(), 2) + Math.pow(polygon.ypoints[i] - p.getY(), 2));
+					intersection = new Point2D.Double(polygon.xpoints[i], polygon.ypoints[i]);
 				}
 				if (Math.sqrt(
-						Math.pow(polygon.xpoints[j] - p.x, 2) + Math.pow(polygon.ypoints[j] - p.y, 2)) < distance) {
-					distance = Math.sqrt(Math.pow(polygon.xpoints[j] - p.x, 2) + Math.pow(polygon.ypoints[j] - p.y, 2));
-					intersection = new PointF(polygon.xpoints[j], polygon.ypoints[j]);
+						Math.pow(polygon.xpoints[j] - p.getX(), 2) + Math.pow(polygon.ypoints[j] - p.getY(), 2)) < distance) {
+					distance = Math.sqrt(Math.pow(polygon.xpoints[j] - p.getX(), 2) + Math.pow(polygon.ypoints[j] - p.getY(), 2));
+					intersection = new Point2D.Double(polygon.xpoints[j], polygon.ypoints[j]);
 				}
 			}
 		}
@@ -200,7 +200,7 @@ public class PolygonBoundary extends Boundary {
 	}
 
 	// Return the closest line of the barrier to the point provided
-	public int closestLine(PointF p) {
+	public int closestLine(Point2D p) {
 		double distance = 9999999;
 		int line = -1;
 
@@ -210,18 +210,17 @@ public class PolygonBoundary extends Boundary {
 			if (j == polygon.npoints)
 				j = 0;
 
-			PointF in = new PointF(0, 0);
+			Point2D in = new Point2D.Double(0.0, 0.0);
 			double dist;
 
-			double u = ((p.x - polygon.xpoints[j]) * (polygon.xpoints[i] - polygon.xpoints[j])
-					+ (p.y - polygon.ypoints[j]) * (polygon.ypoints[i] - polygon.ypoints[j]))
+			double u = ((p.getX() - polygon.xpoints[j]) * (polygon.xpoints[i] - polygon.xpoints[j])
+					+ (p.getY() - polygon.ypoints[j]) * (polygon.ypoints[i] - polygon.ypoints[j]))
 					/ (Math.pow((polygon.xpoints[i] - polygon.xpoints[j]), 2)
 							+ Math.pow((polygon.ypoints[i] - polygon.ypoints[j]), 2));
 
-			in.x = polygon.xpoints[j] + u * (polygon.xpoints[i] - polygon.xpoints[j]);
-			in.y = polygon.ypoints[j] + u * (polygon.ypoints[i] - polygon.ypoints[j]);
+			in.setLocation(polygon.xpoints[j] + u * (polygon.xpoints[i] - polygon.xpoints[j]), polygon.ypoints[j] + u * (polygon.ypoints[i] - polygon.ypoints[j]));
 
-			dist = Math.sqrt(Math.pow(in.x - p.x, 2) + Math.pow(in.y - p.y, 2));
+			dist = Math.sqrt(Math.pow(in.getX() - p.getX(), 2) + Math.pow(in.getY() - p.getY(), 2));
 
 			if (dist < distance) {
 				distance = dist;
@@ -245,7 +244,7 @@ public class PolygonBoundary extends Boundary {
 	}
 
 	// Return the closest point on the barrier to the point provided
-	public PointF moveToBorder(PointF p) {
+	public Point2D moveToBorder(Point2D p) {
 
 		return closestPoint(p);
 	}

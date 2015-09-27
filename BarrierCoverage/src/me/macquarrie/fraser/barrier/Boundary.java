@@ -6,7 +6,7 @@
 package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
-
+import java.awt.geom.Point2D;
 /**
  *
  * @author Fraser
@@ -15,7 +15,7 @@ public abstract class Boundary {
 
 	public abstract void draw(Graphics g);
 
-	public abstract PointF moveToBorder(PointF p);
+	public abstract Point2D moveToBorder(Point2D p);
 
-	public abstract PointF[] setNodes(PointF[] n, int num);
+	public abstract Point2D[] setNodes(Point2D[] n, int num);
 }

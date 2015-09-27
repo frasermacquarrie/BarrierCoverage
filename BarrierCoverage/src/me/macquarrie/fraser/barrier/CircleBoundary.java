@@ -6,7 +6,7 @@
 package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
-//import java.lang.*;
+import java.awt.geom.Point2D;
 
 /**
  *
@@ -14,10 +14,10 @@ import java.awt.*;
  */
 public class CircleBoundary extends Boundary {
 
-	private PointF center;
+	private Point2D center;
 	private double radius;
 
-	public CircleBoundary(PointF c, int r) {
+	public CircleBoundary(Point2D c, int r) {
 		center = c;
 		radius = r;
 	}
@@ -25,35 +25,35 @@ public class CircleBoundary extends Boundary {
 	// Draw the barrier
 	public void draw(Graphics g) {
 		g.setColor(Color.BLUE);
-		g.drawOval((int) (center.x - radius), (int) (center.y - radius), (int) radius * 2, (int) radius * 2);
+		g.drawOval((int) (center.getX() - radius), (int) (center.getY() - radius), (int) radius * 2, (int) radius * 2);
 	}
 
 	public double getWidth() {
 		return (double) radius * 2;
 	}
 
-	public PointF getCenter() {
+	public Point2D getCenter() {
 		return center;
 	}
 
 	// Return the closest point on the barrier to the point provided
-	public PointF moveToBorder(PointF p) {
-		double x = (p.x - center.x);
-		double y = (p.y - center.y);
+	public Point2D moveToBorder(Point2D p) {
+		double x = (p.getX() - center.getX());
+		double y = (p.getY() - center.getY());
 		double dist = Math.sqrt(x * x + y * y);
 
-		return new PointF(((x * radius) / dist), ((y * radius) / dist));
+		return new Point2D.Double(((x * radius) / dist), ((y * radius) / dist));
 	}
 
 	// Set the nodes by beginning at a spot on the circle and rotating around
 	// the circle
-	public PointF[] setNodes(PointF[] nodes, int numNodes) {
+	public Point2D[] setNodes(Point2D[] nodes, int numNodes) {
 
 		for (int i = 1; i < numNodes; i++) {
-			double xcomp = Math.cos(Math.acos((nodes[0].x) / radius) + (2.0 * Math.PI * i) / numNodes);
-			double ycomp = Math.sin(Math.asin((nodes[0].y) / radius) + (2.0 * Math.PI * i) / numNodes);
+			double xcomp = Math.cos(Math.acos((nodes[0].getX()) / radius) + (2.0 * Math.PI * i) / numNodes);
+			double ycomp = Math.sin(Math.asin((nodes[0].getY()) / radius) + (2.0 * Math.PI * i) / numNodes);
 
-			nodes[i] = new PointF((xcomp) * (radius), ((ycomp) * (radius)));
+			nodes[i] = new Point2D.Double((xcomp) * (radius), ((ycomp) * (radius)));
 		}
 		return nodes;
 	}
@@ -61,7 +61,7 @@ public class CircleBoundary extends Boundary {
 	public void log() {
 
 		MainForm.writeFile("Circle Boundary");
-		MainForm.writeFile("center: (" + (String.valueOf(center.x)) + ", " + (String.valueOf(center.y)) + ")");
+		MainForm.writeFile("center: (" + (String.valueOf(center.getX())) + ", " + (String.valueOf(center.getY())) + ")");
 		MainForm.writeFile("radius:    " + (String.valueOf(radius)));
 		MainForm.writeFile("");
 

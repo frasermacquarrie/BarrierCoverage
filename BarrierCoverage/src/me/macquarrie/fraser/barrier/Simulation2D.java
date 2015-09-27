@@ -6,6 +6,7 @@
 package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 //import java.util.*;
 
 /**
@@ -130,13 +131,13 @@ public class Simulation2D extends Simulation {
 		}
 
 		// Create the set of nodes
-		PointF[] nodes = new PointF[numSensors];
+		Point2D[] nodes = new Point2D[numSensors];
 
 		// Move the appropriate sensor to the barrier
 		temp[s].moveTo(boundary.moveToBorder(temp[s].getLocation()));
 
 		// Get the new location of the sensor on the barrier
-		nodes[0] = new PointF(temp[s].getLocation());
+		nodes[0] = new Point2D.Double(temp[s].getLocation().getX(), temp[s].getLocation().getY());
 
 		// Generate the set of nodes by sending the first node to a barrier
 		// function
@@ -155,7 +156,7 @@ public class Simulation2D extends Simulation {
 
 	// Determine if a set of nodes is invalid
 	// By default, all sets of nodes are valid
-	public boolean outOfBounds(PointF[] pts, int num) {
+	public boolean outOfBounds(Point2D[] pts, int num) {
 		return false;
 	}
 
@@ -178,7 +179,7 @@ public class Simulation2D extends Simulation {
 					// their nodes, then do so
 					if (Math.max(temp[i].distanceMoved(), temp[j].distanceMoved()) > Math.max(
 							temp[i].distanceFrom(temp[j].getLocation()), temp[j].distanceFrom(temp[i].getLocation()))) {
-						PointF p = new PointF(temp[i].getLocation());
+						Point2D p = new Point2D.Double(temp[i].getLocation().getX(), temp[i].getLocation().getY());
 						temp[i].moveTo(temp[j].getLocation());
 						temp[j].moveTo(p);
 						sort = true;
@@ -191,7 +192,7 @@ public class Simulation2D extends Simulation {
 	}
 
 	// Sort a set of sensors that are already on nodes using an algorithm to
-	// minimuze the min-sum
+	// minimize the min-sum
 	private Sensor2D[] minSort(Sensor2D[] temp) {
 
 		boolean sort = true;
@@ -204,12 +205,11 @@ public class Simulation2D extends Simulation {
 			for (int i = 0; i < numSensors; i++) {
 				for (int j = i; j < numSensors; j++) {
 
-					// If the total moved betwene the two sensors can be lowed
-					// by switching
-					// their nodes, then do so
+					// If the total moved between the two sensors can be lowered
+					// by switching their nodes, then do so
 					if (temp[i].distanceMoved() + temp[j].distanceMoved() > temp[i].distanceFrom(temp[j].getLocation())
 							+ temp[j].distanceFrom(temp[i].getLocation())) {
-						PointF p = new PointF(temp[i].getLocation());
+						Point2D p = new Point2D.Double(temp[i].getLocation().getX(), temp[i].getLocation().getY());
 						temp[i].moveTo(temp[j].getLocation());
 						temp[j].moveTo(p);
 						sort = true;
@@ -228,7 +228,7 @@ public class Simulation2D extends Simulation {
 	}
 
 	// Move a set of sensors to a valid set of nodes
-	public Sensor2D[] sensorsToNodes(Sensor2D[] temp, PointF[] nodes, int s) {
+	public Sensor2D[] sensorsToNodes(Sensor2D[] temp, Point2D[] nodes, int s) {
 
 		int[] closestNode = new int[numSensors];
 		double[] nodeDistance = new double[numSensors];

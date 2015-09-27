@@ -7,6 +7,7 @@ package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
 //import java.io.*;
+import java.awt.geom.Point2D;
 
 /**
  *
@@ -24,7 +25,7 @@ public class Simulation2DPolygon extends Simulation2D {
 			double x = ((Math.random() - 0.5) * w);
 			double y = ((Math.random() - 0.5) * w);
 
-			if (PolygonBoundary.isSimpleWith(poly, new PointF(x, y))) {
+			if (PolygonBoundary.isSimpleWith(poly, new Point2D.Double(x, y))) {
 				poly.addPoint((int) x, (int) y);
 			}
 		}
@@ -41,7 +42,7 @@ public class Simulation2DPolygon extends Simulation2D {
 				y = ((Math.random() - 0.5) * w);
 			} while (!poly.contains(x, y));
 
-			this.sensors[i] = new Sensor2D(new PointF(x, y), sensorRange);
+			this.sensors[i] = new Sensor2D(new Point2D.Double(x, y), sensorRange);
 		}
 	}
 

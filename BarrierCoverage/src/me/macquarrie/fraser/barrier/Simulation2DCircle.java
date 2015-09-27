@@ -6,6 +6,7 @@
 package me.macquarrie.fraser.barrier;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 /**
  *
@@ -16,7 +17,7 @@ public class Simulation2DCircle extends Simulation2D {
 	public Simulation2DCircle(int radius, int numSens, int sensRange, Image g, MainForm p) {
 		super(radius, numSens, sensRange, g, p);
 
-		boundary = new CircleBoundary(new PointF(0, 0), radius);
+		boundary = new CircleBoundary(new Point2D.Double(0.0, 0.0), radius);
 
 		for (int i = 0; i < numSensors; i++) {
 
@@ -29,15 +30,15 @@ public class Simulation2DCircle extends Simulation2D {
 				y = ((Math.random() - 0.5) * radius * 2.0);
 			} while (Math.sqrt(x * x + y * y) > radius);
 
-			this.sensors[i] = new Sensor2D(new PointF(x, y), sensorRange);
+			this.sensors[i] = new Sensor2D(new Point2D.Double(x, y), sensorRange);
 		}
 	}
 
 	// Determine whether a set of nodes has been skewed due to precision loss
 	@Override
-	public boolean outOfBounds(PointF[] pts, int num) {
+	public boolean outOfBounds(Point2D[] pts, int num) {
 		for (int i = 1; i < num; i++) {
-			if (Math.sqrt(Math.pow(pts[0].x - pts[i].x, 2) + Math.pow(pts[0].y - pts[i].y, 2)) > 1.00001 * width) {
+			if (Math.sqrt(Math.pow(pts[0].getX() - pts[i].getX(), 2) + Math.pow(pts[0].getY() - pts[i].getY(), 2)) > 1.00001 * width) {
 				return true;
 			}
 		}
